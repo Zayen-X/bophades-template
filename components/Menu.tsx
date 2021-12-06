@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
+import Link from 'next/link';
 import { useWallet } from 'use-wallet';
-import { Box, TextField, Button, Typography } from '@mui/material';
+import { Container, Nav, Navbar, Button, Form } from 'react-bootstrap';
+import styles from '../styles/Home.module.css';
 
 function ConnectMenu({ connect, disconnect, connected }) {
   const [isConnected, setConnected] = useState(connected);
@@ -24,7 +24,7 @@ function ConnectMenu({ connect, disconnect, connected }) {
 
   return (
     <div className="wallet-menu" id="wallet-menu">
-      <Button id="wallet-button" variant="contained" color="secondary" size="large" onClick={clickFunc} key={1}>
+      <Button id="wallet-button" variant="primary" onClick={clickFunc} key={1}>
         {buttonText}
       </Button>
     </div>
@@ -33,28 +33,32 @@ function ConnectMenu({ connect, disconnect, connected }) {
 
 export default function ButtonAppBar({ title }) {
   const wallet = useWallet();
-  const account = wallet.account;
+  let account = '';
+  if (wallet.isConnected()) {
+    const accountAddress = wallet.account;
+    account = accountAddress.slice(0, 10) + '...' + accountAddress.slice(accountAddress.length - 4);
+  }
   return (
-    <Box>
-      <AppBar position="sticky" elevation={0}>
-        <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            {title}
-          </Typography>
-          {wallet.isConnected() && (
-            <TextField
-              variant="standard"
-              label="Address"
-              defaultValue={account}
-              InputProps={{
-                readOnly: true,
-              }}
-              sx={{ flexGrow: 1 }}
-            />
-          )}
-          <ConnectMenu connect={wallet.connect} disconnect={wallet.reset} connected={wallet.isConnected()} />
-        </Toolbar>
-      </AppBar>
-    </Box>
+    <Navbar bg="dark" variant="dark" sticky="top">
+      <Container fluid>
+        <Navbar.Brand>{title}</Navbar.Brand>
+        <Navbar.Collapse>
+          <Nav className="me-auto">
+            <Link href="/Page1" passHref>
+              <Nav.Link>Page1</Nav.Link>
+            </Link>
+            <Link href="/Page2" passHref>
+              <Nav.Link>Page2</Nav.Link>
+            </Link>
+          </Nav>
+          <Nav>
+            {wallet.isConnected() && (
+              <Form.Control type="text" placeholder={account} readOnly className={styles.monospace} />
+            )}
+            <ConnectMenu connect={wallet.connect} disconnect={wallet.reset} connected={wallet.isConnected()} />
+          </Nav>
+        </Navbar.Collapse>
+      </Container>
+    </Navbar>
   );
 }
